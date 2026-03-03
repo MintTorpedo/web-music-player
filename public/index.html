@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Music - Home</title>
+
+	<link rel="icon" type="image/x-icon" href="/assets/fav.ico">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+
+	<meta name="viewport" content="width=device-width">
+
+	<link rel="stylesheet" href="/css/theme.css">
+	<link rel="stylesheet" href="/css/header.css">
+	<link rel="stylesheet" href="/css/player.css">
+	<link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+	<header class="flex-v">
+		<div class="title flex-h">
+			<img src="/assets/icon.gif" width="60" height="60">
+			<h1>Music player</h1>
+		</div>
+
+		<nav class="flex-h">
+			<a id="nav-tracks">Tracks</a>
+			<a id="nav-albums">Albums</a>
+			<a id="nav-artists">Artists</a>
+		</nav>
+	</header>
+
+	<div class="header-container flex-h page-padding">
+		<h2 class="title">57 tracks</h2>
+
+		<div class="header-sortby flex-h">
+			<h3>Sort by</h3>
+
+			<div class="select-wrapper">
+				<select id="input-sortby" class="clickable">
+					<option value="0">date added</option>
+					<option value="1">name</option>
+					<option value="2">random</option>
+					<option value="3">duration</option>
+					<option value="4">tracks</option>
+					<option value="5">albums</option>
+				</select>
+			</div>
+
+			<div id="sort-btns" class="sort-btns-wrapper">
+				<img src="/assets/sort-asc.svg" id="sort-asc" class="clickable" alt="Sort ascending">
+				<img src="/assets/sort-des.svg" id="sort-des" class="clickable hidden" alt="Sort descending">
+			</div>
+		</div>
+
+		<input type="text" id="input-search" placeholder="Search">
+	</div>
+
+	<div class="card-container page-padding">
+		<div class="card">
+			<img src="/assets/missing.jpg">
+			<h3>Answer from X Girlz</h3>
+			<p>t+pazolite</p>
+		</div>
+
+		<div class="card">
+			<img src="/assets/missing.jpg">
+			<h3>Answer from X Girlz</h3>
+			<p>t+pazolite</p>
+		</div>
+
+		<div class="card">
+			<img src="/assets/missing.jpg">
+			<h3>Answer from X Girlz</h3>
+			<p>t+pazolite</p>
+		</div>
+
+		<div class="card">
+			<img src="/assets/missing.jpg">
+			<h3>Answer from X Girlz</h3>
+			<p>t+pazolite</p>
+		</div>
+	</div>
+
+	<div class="music-player flex-v hidden">
+		<div class="progress">
+			<input type="range" id="music-progress" min="0" step="any">
+			<div class="bar"></div>
+		</div>
+
+		<div class="music-player-main flex-h">
+			<div class="playing flex-h">
+				<div class="playing-track">
+					<img src="/assets/missing.jpg" id="player-image">
+					<img src="/assets/arrow-up.svg" class="image-toggle">
+				</div>
+
+				<div class="playing-info flex-v">
+					<span class="playing-title">Higher</span>
+					<span class="playing-artist">Crim Nanakusa</span>
+				</div>
+
+			</div>
+
+			<div class="controls flex-h">
+				<img src="/assets/shuffle.svg" id="media-shuffle" class="option">
+				<img src="/assets/previous.svg" id="media-previous">
+				<img src="/assets/play.svg" id="media-play">
+				<img src="/assets/pause.svg" id="media-pause">
+				<img src="/assets/next.svg" id="media-next">
+				<img src="/assets/repeat.svg" id="media-repeat" class="option">
+			</div>
+
+			<div class="queue">
+				<div class="volume-wrapper">
+					<img src="/assets/volume-high.svg" id="media-volume">
+
+					<div class="volume-slider flex-v" id="volume-container">
+						<span id="volume-title">100%</span>
+						<input type="range" id="media-volume-slider" min="0" max="100" value="50"/>
+					</div>
+				</div>
+
+				<div class="playlist-wrapper">
+					<img src="/assets/queue.svg" id="media-playlist">
+
+					<div id="playlist-container" class="playlist flex-v hidden">
+						<div class="row clickable flex-h">
+							<div class="row-image-wrapper" style="background-image: url(/assets/missing.jpg)">
+								<img src="/assets/pause.svg" class="play-icon">
+							</div>
+
+							<div class="row-info">
+								<h3 class="row-text">title</h3>
+								<p class="row-text">description</p>
+							</div>
+						</div>
+
+						<div class="row clickable flex-h">
+							<div class="row-image-wrapper" style="background-image: url(/assets/missing.jpg)">
+								<img src="/assets/pause.svg" class="play-icon">
+							</div>
+
+							<div class="row-info">
+								<h3 class="row-text">title</h3>
+								<p class="row-text">description</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script src="/src/event.js"></script>
+	<script src="/src/api.js"></script>
+	<script src="/src/fetchData.js"></script>
+
+	<script src="/src/cPartialSort.js"></script>
+	<script src="/src/components/card.js"></script>
+	<script src="/src/components/row.js"></script>
+
+	<script src="/src/player.js"></script>
+	<script src="/src/playlist.js"></script>
+	<script src="/src/main.js"></script>
+</body>
+</html>

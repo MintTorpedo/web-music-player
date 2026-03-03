@@ -1,0 +1,67 @@
+class CPartialSort {
+	constructor(reference, filterInfo) {
+		this.reference = reference;
+		this.filterInfo = filterInfo;
+		this.isReversed = false;
+
+		this.reset();
+	}
+
+	reset() {
+		this.mapped = new Map();
+		this.sorted = [];
+		this.position = 0;
+	}
+
+	reverse() {
+		this.reset();
+		this.isReversed = !this.isReversed;
+	}
+
+	sortTo(index) {
+		const filter = this.filterInfo.filter;
+		if (this.sorted.length === this.reference.length) return;
+
+		const offset = this.isReversed ? -1 : 1;
+
+		while (index >= this.sorted.length) {
+			let best = null;
+
+			for (let i = 0; i < this.reference.length; i++) {
+				const item = this.reference[i]
+				if (this.mapped.has(item)) continue;
+
+				if (best === null || filter(item, best) * offset > 0) {
+					best = item;
+				}
+			}
+
+			if (best === null) break;
+			this.sorted.push(best);
+			this.mapped.set(best, true);
+		}
+	}
+
+	get(index) {
+		const maxLength = this.reference.length;
+		if (index >= maxLength) {
+			console.warn(`[CPartialSort] OUT OF BOUNDS! index(${index}) max(${maxLength})`);
+			return;
+		};
+
+		const activeLength = this.sorted.length;
+		if (index >= activeLength) {
+			this.sortTo(index);
+		}
+
+		return this.sorted[index];
+	}
+
+	getChildren() {
+		return this.reference;
+	}
+
+	getLength() {
+		return this.reference.length;
+	}
+}

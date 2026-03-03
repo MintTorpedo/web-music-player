@@ -1,0 +1,121 @@
+/* 
+==================
+= SIMPLE STYLING =
+==================
+*/
+
+:root {
+	--color-grey-50: #FAFAFA;
+	--color-grey-100: #F4F4F4;
+	--color-grey-200: #EDEDED;
+	--color-grey-300: #DEDEDE;
+	--color-grey-400: #BBBBBB;
+	--color-grey-500: #9C9C9C;
+	--color-grey-600: #737373;
+	--color-grey-700: #5F5F5F;
+	--color-grey-800: #404040;
+	--color-grey-900: #1F1F1F;
+
+	--color-grey-550: #909090;
+	--color-grey-650: #707070;
+	--color-grey-750: #505050;
+	--color-grey-850: #303030;
+	--color-grey-950: #101010;
+	
+    --color-primary-50:  #e9fff8;
+    --color-primary-100: #cbffeb;
+    --color-primary-200: #7fffd4;
+    --color-primary-300: #5bfacf;
+    --color-primary-400: #1becba;
+    --color-primary-500: #00d4a4;
+    --color-primary-600: #00ad88;
+    --color-primary-700: #008a70;
+    --color-primary-800: #006d5a;
+    --color-primary-900: #00594b;
+    --color-primary-950: #00332b;
+
+	--page-padding: 60px;
+}
+
+html {
+	background-color: var(--color-grey-850);
+	color: var(--color-grey-200);
+
+	font-family: monospace;
+}
+
+body {
+	margin: 0;
+}
+
+button {
+	background-color: var(--color-grey-300);
+
+	cursor: pointer;
+
+	border: none;
+	border-radius: 2px;
+
+	outline: 1px solid var(--color-grey-900);
+
+	box-shadow: 
+		inset -2px -2px 2px var(--color-grey-600),
+		inset 2px 2px 2px var(--color-grey-200);
+}
+
+button:hover {
+	background-color: var(--color-grey-400);
+	box-shadow: 
+		inset -2px -2px 2px var(--color-grey-700),
+		inset 2px 2px 2px var(--color-grey-300);
+}
+
+button:active {
+	background-color: var(--color-grey-500);
+	color: var(--color-grey-100);
+
+	box-shadow: 
+		inset -2px -3px 1px var(--color-grey-400),
+		inset 1px 1px 1px var(--color-grey-900);
+}
+
+.page-padding {
+	padding-left: var(--page-padding) !important;
+	padding-right: var(--page-padding) !important;
+}
+
+.flex-h {
+	display: flex;
+	flex-direction: row;
+}
+
+.flex-v {
+	display: flex;
+	flex-direction: column;
+}
+
+.hidden {
+	display: none !important;
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.clickable:hover {
+	filter: brightness(0.9);
+}
+
+.clickable:active {
+	filter: brightness(0.8);
+}
+
+.collapse-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.btn-active {
+	filter: brightness(0) saturate(100%) invert(69%) sepia(25%) saturate(6043%) hue-rotate(121deg) brightness(96%) contrast(104%) !important;
+}

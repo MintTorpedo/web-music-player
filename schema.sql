@@ -1,0 +1,91 @@
+CREATE TABLE IF NOT EXISTS tracks (
+	id INTEGER PRIMARY KEY,
+
+	name TEXT NOT NULL UNIQUE,
+	location TEXT NOT NULL UNIQUE,
+	filename TEXT NOT NULL UNIQUE,
+
+	year INTEGER,
+	duration INTEGER NOT NULL,
+	loudness REAL,
+
+	play_count INTEGER DEFAULT 0,
+	last_played TEXT DEFAULT CURRENT_TIMESTAMP,
+
+	image TEXT,
+	video TEXT,
+
+	creation TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS artists (
+	id INTEGER PRIMARY KEY,
+
+	name TEXT NOT NULL UNIQUE,
+	description TEXT,
+
+	image TEXT
+
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS track_artists (
+	id INTEGER PRIMARY KEY,
+
+	track_id INTEGER NOT NULL,
+	artist_id INTEGER NOT NULL,
+
+	UNIQUE (track_id, artist_id),
+
+	FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+	FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+) STRICT;
+
+
+CREATE TABLE IF NOT EXISTS albums (
+	id INTEGER PRIMARY KEY,
+
+	name TEXT NOT NULL UNIQUE,
+	image TEXT
+	
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS track_albums (
+	id INTEGER PRIMARY KEY,
+
+	position INTEGER DEFAULT 1,
+
+	track_id INTEGER NOT NULL,
+	album_id INTEGER NOT NULL,
+
+	UNIQUE (track_id, album_id),
+
+	FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+	FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
+
+) STRICT;
+
+
+CREATE TABLE IF NOT EXISTS playlists (
+	id INTEGER PRIMARY KEY,
+
+	name TEXT NOT NULL UNIQUE,
+	image TEXT,
+
+	creation TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS track_playlists (
+	id INTEGER PRIMARY KEY,
+
+	position INTEGER DEFAULT 1,
+
+	track_id INTEGER NOT NULL,
+	playlist_id INTEGER NOT NULL,
+
+	UNIQUE (track_id, playlist_id),
+
+	FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+	FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE
+) STRICT;
