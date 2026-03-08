@@ -4,6 +4,7 @@ class CPartialSort {
 		this.reference = children;
 		this.filterInfo = filterInfo;
 		this.isReversed = false;
+		this.searchText = InputSearch.value;
 
 		this.reset();
 	}
@@ -11,6 +12,8 @@ class CPartialSort {
 	save() {
 		localStorage.setItem('sorting_filter', this.filterInfo.id);
 		localStorage.setItem('sorting_tab', this.tabInfo.id);
+
+		localStorage.setItem('filter_search', this.searchText);
 	}
 
 	reset() {

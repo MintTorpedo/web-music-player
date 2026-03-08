@@ -136,7 +136,7 @@ function DrawCards(tab) {
 	ContainerTitle.innerHTML = `${children.length} ${tab.name} (${totalHours} hours, ${totalMins} minutes)`;
 }
 
-function ChangeTab(clickedTab) {
+function ChangeTab(clickedTab, noSearchReset) {
 	if (activeTab) {
 		activeTab.element.classList.remove('active');
 	}
@@ -168,7 +168,9 @@ function ChangeTab(clickedTab) {
 		InputSortby.value = defaultFilterId;
 	}
 
-	InputSearch.value = '';
+	if (!noSearchReset) {
+		InputSearch.value = '';
+	}
 
 	SetupSorting(clickedTab);
 	DrawCards(clickedTab);
@@ -248,11 +250,16 @@ gEvent.on('loaded', () => {
 		const sortFilterId = localStorage.getItem('sorting_filter');
 		InputSortby.value = sortFilterId || 0;
 
-		console.log('Sort filter!!', sortFilterId)
+		console.log('Sort filter!!', sortFilterId);
 	}
 
-	SetupSorting(tab);
-	ChangeTab(tab);
+	const searchText = localStorage.getItem('filter_search');
+	if (searchText) {
+		InputSearch.value = searchText;
+	}
+
+	//SetupSorting(tab);
+	ChangeTab(tab, !!searchText);
 
 	if (!sortTabId) return;
 	player.load();

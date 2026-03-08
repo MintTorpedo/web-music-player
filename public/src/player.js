@@ -241,7 +241,16 @@ class CPlayer {
 
 		this.setCardIsPlaying(ENUM.playbackState.inactive, this.prevCard);
 
-		const safeLocation = encodeURIComponent(decodeURIComponent(nextTrack.location));
+		let safeLocation;
+		try {
+			safeLocation = encodeURIComponent(decodeURIComponent(nextTrack.location));
+
+		} catch(err) {
+			console.error(err);
+			console.log(`Failed to parse audio path "${nextTrack.location}"`);
+		}
+
+		if (!safeLocation) return;
 
 		this.prevTrack = this.track;
 		this.track = nextTrack;

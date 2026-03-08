@@ -256,7 +256,7 @@
 	overflow: hidden;
 }
 
-.playlist .row {
+.row {
 	gap: 0.5em;
 
 	box-sizing: border-box;
@@ -272,7 +272,6 @@
 
 	position: relative;
 	border-radius: 3px;
-	overflow: hidden;
 
 	background-position: center;
 	background-size: contain;
@@ -296,6 +295,12 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+}
+
+.row-info {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 .row-info > * {
