@@ -3,85 +3,101 @@ class CPlaylist {
 		this.position = 0;
 	}
 
-	set(sortContent) {
-		if (this.sortContent === sortContent) return;
-		this.sortContent = sortContent;
+	set(sortInfo) {
+		if (this.sortInfo === sortInfo) return;
 
-		const children = sortContent.getChildren()
+		const children = sortInfo.getChildren();
+		this.sortInfo = sortInfo;
+		this.sortLength = children.length;
+
 		const data = children[0];
 		this.isTracks = !!data.location;
 		this.isAlbums = !!(data.tracks && data.artists);
 		this.isArtists = !!data.albums;
 
-		this.artists = [];
-		if (this.isTracks) {
-			this.artists.push({
-				'albums': [{'tracks': children}]
-			});
-
-		} else if (this.isAlbums || this.isArtists) {
-			this.artists.push({
-				'albums': children
-			});
-
-		} else if (this.isArtists) {
-			this.artists = children;
-		}
-
-		this.currentTrack;
 		this.position = 0;
-		this.trackCount = 0;
-		this.iterateTracks((_, i) => {
-			this.trackCount = i;
-		})
+		this.cache = [];
+	}
+
+	save() {
+		localStorage.setItem('playlist_position', this.position);
+		this.sortInfo.save();
+	}
+
+	load() {
+		let position = localStorage.getItem('playlist_position');
+		if (!position) return;
+
+		this.position = parseInt(position);
+		console.log('new playlist!', this);
+	}
+
+	iterateTracksFromAlbum(album, callback) {	
+		for (let i = 0; i < album.tracks.length; i++) {
+			const track = album.tracks[i];
+			if ( callback(track) ) return true;
+		}
+	}
+
+	iterateTracksFromEntry(data, callback) {
+		if (this.isTracks) return callback(data);
+
+		for (let i = 0; i < data.tracks.length; i++) {
+			const track = data.tracks[i];
+			if ( callback(track) ) return true;
+		}
 	}
 
 	iterateTracks(callback) {
-		let count = 0;
+		let position = 0;
+		let index = 0;
 
-		for (let i = 0; i < this.artists.length; i++) {
-			const artist = this.artists[i];
-
-			for (let i = 0; i < artist.albums.length; i++) {
-				const album = artist.albums[i];
-
-				for ( let i = 0; i < album.tracks.length; i++) {
-					const track = album.tracks[i];
-					if (callback(track, count)) return;
-
-					count++;
+		const maxCachePosition = this.cache.length - 1;
+		while (true) {
+			let success = false;
+			const entry = this.sortInfo.get(index);
+			this.iterateTracksFromEntry(entry, track => {
+				if (position > maxCachePosition) {
+					this.cache.push([track, entry]);
 				}
-			}
+				
+				if ( callback(track, position, index) ) {
+					success = true;
+					return true
+				};
+				position++;
+			});
+
+			if (success) break;
+			index++;
+
+			if (index >= this.sortLength) {
+				console.log('no success...'); 
+				console.trace(); 
+				break;
+			};
 		}
 	}
 
-	getAt(targetIndex) {
-		let trackFound;
-		this.iterateTracks((track, i) => {
-			if (i !== targetIndex) return;
+	getAt(targetPosition) {
+		if (targetPosition > this.cache.length - 1) {
+			this.iterateTracks((_, position) => {
+				if (position === targetPosition) return true;
+			});
+		}
 
-			trackFound = track;
-			return true;
-		});
-
-		return trackFound;
+		let position = targetPosition % this.cache.length;
+		return this.cache[position][0];
 	}
 
-	getNextUpcoming(nextPos) {
-		const startPos = this.position;
-		const endPos = startPos + nextPos;
-
-		//console.log('start pos:', startPos, 'end pos:', endPos)
+	getNextUpcoming(count) {
+		const startPosition = this.position;
 
 		const result = [];
-		this.iterateTracks((track, i) => {
-			if (i < startPos) return;
-
+		for (let position = 1; position <= count; position++) {
+			const track = this.getAt(startPosition + position);
 			result.push(track);
-			//console.log('Added:', i);
-
-			if (i >= endPos) return true;
-		});
+		}
 
 		return result;
 	}
@@ -89,27 +105,32 @@ class CPlaylist {
 	setPosition(targetTrack) {
 		if (this.currentTrack === targetTrack) return;
 
-		this.iterateTracks((track, i) => {
-			if (track !== targetTrack) return;
+		let position = 0;
+		while (true) {
+			const track = this.getAt(position);
+			if (targetTrack === track) break;
 
-			this.position = i;
-			this.currentTrack = track;
+			position++;
+		}
 
-			return true;
-		});
+		this.position = position;
+	}
+
+	getCurrent() {
+		return this.getAt(this.position);
+	}
+
+	getCurrentData() {
+		return this.cache[this.position][1]
 	}
 
 	getNext() {
-		const index = (this.position + 1) % this.trackCount;
-		this.position = index;
-
-		return this.getAt(index);
+		this.position++;
+		return this.getCurrent();
 	}
 
 	getPrev() {
-		const index = Math.abs((this.position - 1) % this.trackCount);
-		this.position = index;
-
-		return this.getAt(index);
+		this.position--;
+		return this.getCurrent();
 	}
 }

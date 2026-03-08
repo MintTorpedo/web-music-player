@@ -12,31 +12,37 @@ const SortBtns = document.querySelector('#sort-btns');
 
 const Filters = [
 	{ // Date added
+		'id': 0,
 		'orderBtn': true,
 		'filter': (a, b) => a.id - b.id,
 	},
 
 	{ // Alphabetical order
+		'id': 1,
 		'orderBtn': true,
 		'filter': (a, b) => a.name.localeCompare(b.name),
 	},
 
 	{ // Random
+		'id': 2,
 		'orderBtn': false,
 		'filter': (a, b) => Math.random() - 0.5,
 	},
 
 	{ // Track duration
+		'id': 3,
 		'orderBtn': true,
 		'filter': (a, b) => a.duration - b.duration,
 	},
 
 	{ // Total tracks
+		'id': 4,
 		'orderBtn': true,
 		'filter': (a, b) => a.tracks.length - b.tracks.length,
 	},
 
 	{ // Total albums
+		'id': 5,
 		'orderBtn': true,
 		'filter': (a, b) => a.albums.length - b.albums.length,
 	},
@@ -67,7 +73,8 @@ function SetupSorting(customTab) {
 		FilterByName(children);
 	}
 
-	activeResult = new CPartialSort(children, operation);
+	activeResult = new CPartialSort(tab, children, operation);
+	//activeResult.save();
 	activeResultPos = 0;
 
 	if (!operation.orderBtn) {
@@ -98,7 +105,7 @@ function DrawCardBatch(offset) {
 		CardContainer.appendChild(card);
 	}
 
-	player.showElementPlayingIcon(true);
+	//player.setCardIsPlaying(true);
 
 	activeResultPos = maxDist;
 }
@@ -117,7 +124,7 @@ function DrawCards(tab) {
 	activeResultPos = 0;
 	DrawCardBatch(20);
 
-	player.showElementPlayingIcon(true)
+	//player.setCardIsPlaying(true)
 
 	if (!isTracks) {
 		ContainerTitle.innerHTML = `${children.length} ${tab.name}`;
@@ -137,7 +144,8 @@ function ChangeTab(clickedTab) {
 	activeTab = clickedTab;
 	clickedTab.element.classList.add('active');
 
-	let debounce = false;
+	let isAvailable = false;
+	let defaultFilterId = null;
 
 	const filterOptions = [...InputSortby.children];
 	filterOptions.forEach((element, filterId) => {
@@ -148,11 +156,17 @@ function ChangeTab(clickedTab) {
 
 		element.classList.remove('hidden');
 
-		if (debounce) return;
-		debounce = true;
+		if (InputSortby.value === element.value) {
+			isAvailable = true;
+		}
 
-		InputSortby.value = element.value;
+		if (defaultFilterId) return;
+		defaultFilterId = element.value
 	});
+
+	if (!isAvailable) {
+		InputSortby.value = defaultFilterId;
+	}
 
 	InputSearch.value = '';
 
@@ -162,6 +176,7 @@ function ChangeTab(clickedTab) {
 
 const Tabs = [
 	{
+		id: 0,
 		name: 'tracks',
 		element: document.querySelector('#nav-tracks'),
 		card: CardTrack,
@@ -171,6 +186,7 @@ const Tabs = [
 	},
 
 	{
+		id: 1,
 		name: 'albums',
 		element: document.querySelector('#nav-albums'),
 		card: CardAlbum,
@@ -180,6 +196,7 @@ const Tabs = [
 	},
 
 	{
+		id: 2,
 		name: 'artists',
 		element: document.querySelector('#nav-artists'),
 		card: CardArtist,
@@ -222,8 +239,23 @@ InputSearch.addEventListener('input', () => {
 });
 
 gEvent.on('loaded', () => {
-	SetupSorting( Tabs[0] );
-	ChangeTab( Tabs[0] );
+	const sortTabId = localStorage.getItem('sorting_tab');
+	let tab = Tabs[0];
+
+	if (sortTabId) {
+		tab = Tabs[ parseInt(sortTabId) ];
+		
+		const sortFilterId = localStorage.getItem('sorting_filter');
+		InputSortby.value = sortFilterId || 0;
+
+		console.log('Sort filter!!', sortFilterId)
+	}
+
+	SetupSorting(tab);
+	ChangeTab(tab);
+
+	if (!sortTabId) return;
+	player.load();
 });
 
 document.addEventListener('scroll', function(e) {

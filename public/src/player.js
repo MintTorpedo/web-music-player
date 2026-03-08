@@ -28,6 +28,22 @@ function ToggleMediaBtns() {
 	mediaBtnPause.classList.toggle('hidden');
 }
 
+// function Easing(x) {
+// 	return 1 - Math.pow(1 - x, 3);
+// }
+
+function Easing(x) { // QuadOutIn
+	x = 1 - x;
+	const y = x < 0.5
+		? 2 * x * x
+		: 1 - Math.pow(-2 * x + 2, 2) / 2;
+	return 1 - y;
+}
+
+// function Easing(x) {
+// 	return x;
+// }
+
 class CPlayer {
 	constructor() {
 		this.audio = new Audio();
@@ -37,6 +53,7 @@ class CPlayer {
 		this.playlist = new CPlaylist();
 		this.isRepeat = false;
 		this.volume = 0.25;
+		this.prevCard = null;
 
 		mediaBtnPlay.addEventListener('click', () => {
 			this.play();
@@ -51,7 +68,7 @@ class CPlayer {
 
 		musicProgress.addEventListener('change', () => {
 			this.audio.currentTime = musicProgress.value;
-			this.beginBarRefresh();
+			this.resumeBarRefresh();
 		});
 
 		mediaBtnRepeat.addEventListener('click', () => {
@@ -89,6 +106,32 @@ class CPlayer {
 
 			this.playNext();
 		});
+
+		window.addEventListener('pagehide', () => {
+			this.save();
+		});
+	}
+
+	save() {
+		localStorage.setItem('player_volume', this.volume);
+		localStorage.setItem('player_duration', this.audio.currentTime);
+	}
+
+	load() {
+		const value = localStorage.getItem('player_volume');
+		this.volume = parseFloat(value) || 0.5;
+
+		this.playlist.set(activeResult);
+		this.playlist.load();
+
+		const track = this.playlist.getCurrent();
+		this.changeTrack(track, true);
+
+		const duration = localStorage.getItem('player_duration');
+		this.audio.currentTime = parseFloat( duration );
+		this.updateBar();
+
+		console.log('Finished loading!');
 	}
 
 	refreshVolume() {
@@ -96,12 +139,11 @@ class CPlayer {
 
 		volumeTitle.textContent = value + '%';
 		this.volume = parseInt(value) / 100;
-		this.audio.volume = this.volume;
+		this.audio.volume = Easing(this.volume);
 	}
 
 	updatePlaylist(resultContent) {
 		this.playlist.set(resultContent);
-		//this.updateUpcoming();
 	}
 
 	updateUpcoming() {
@@ -110,6 +152,7 @@ class CPlayer {
 		playlistContainer.innerHTML = '';
 
 		const tracks = this.playlist.getNextUpcoming(5);
+
 		for (let i = tracks.length - 1; i >= 0; i--) {
 			const row = RowTrack(tracks[i], i === 0);
 			playlistContainer.appendChild(row);
@@ -131,38 +174,57 @@ class CPlayer {
 		}
 
 		if (!track) return;
-
 		this.changeTrack(track);
 	}
 
-	showElementPlayingIcon(show) {
+	setCardIsPlaying(playbackState, prevCard) {
 		const track = this.track;
 		if (!track) return;
 
-		const children = [...CardContainer.children];
-		for (let i = 0; i < children.length; i++) {
-			const element = children[i];
-			const data = element.data;
+		let currentCard;
+		if (prevCard) {
+			currentCard = prevCard;
 
-			if (data.tracks) {
-				if (!data.tracks.includes(track)) continue;
+		} else {
+			const targetData = this.playlist.getCurrentData();
 
-			} else {
-				if (element.data != track) continue;	
+			const children = [...CardContainer.children];
+			for (let i = 0; i < children.length; i++) {
+				const element = children[i];
+				if (element.data != targetData) continue;
+
+				currentCard = element;
+				break;
 			}
 
-			const playIcon = element.querySelector('.play-icon');
-			if (show) {
-				playIcon.classList.remove('hidden');
-			} else {
-				playIcon.classList.add('hidden');
-			}
+			this.prevCard = currentCard;
+		}
 
-			break;
+		if (!currentCard) return;
+
+		const pauseIcon = currentCard.querySelector('.pause-icon');
+		const playIcon = currentCard.querySelector('.play-icon');
+
+		if (playbackState != ENUM.playbackState.inactive) {
+			currentCard.classList.add('active');
+		}
+
+		if (playbackState === ENUM.playbackState.playing) {
+			pauseIcon.classList.remove('hidden');
+			playIcon.classList.add('hidden');
+
+		} else if (playbackState === ENUM.playbackState.stopped) {
+			pauseIcon.classList.add('hidden');
+			playIcon.classList.remove('hidden');
+
+		} else if (playbackState === ENUM.playbackState.inactive) {
+			currentCard.classList.remove('active');
+			pauseIcon.classList.add('hidden');
+			playIcon.classList.add('hidden');
 		}
 	}
 
-	changeTrack(nextTrack) {
+	changeTrack(nextTrack, doNotPlay) {
 		if ( mediaBtnPlay.classList.contains('hidden') ) {
 			ToggleMediaBtns();
 		}
@@ -177,14 +239,14 @@ class CPlayer {
 
 		//volume = 1;
 
-		this.showElementPlayingIcon(false);
+		this.setCardIsPlaying(ENUM.playbackState.inactive, this.prevCard);
 
 		const safeLocation = encodeURIComponent(decodeURIComponent(nextTrack.location));
 
 		this.prevTrack = this.track;
 		this.track = nextTrack;
 		this.audio.src = safeLocation;
-		this.audio.volume = this.volume;
+		//this.audio.volume = this.volume;
 		this.isPlaying = false;
 
 		musicPlayer.classList.remove('hidden');
@@ -193,11 +255,16 @@ class CPlayer {
 		musicProgress.setAttribute('max', nextTrack.duration);
 
 		this.updatePlayerInfo();
-
-		this.play();
 		this.playlist.setPosition(nextTrack);
 
-		this.showElementPlayingIcon(true);
+		if (doNotPlay) {
+			this.setCardIsPlaying(ENUM.playbackState.stopped);
+
+		} else {
+			this.playlist.save();
+			this.play();
+		}
+
 		this.updateUpcoming();
 	}
 
@@ -226,7 +293,8 @@ class CPlayer {
 
 		ToggleMediaBtns();
 
-		this.beginBarRefresh();
+		this.resumeBarRefresh();
+		this.setCardIsPlaying(ENUM.playbackState.playing);
 	}
 
 	pause() {
@@ -239,29 +307,33 @@ class CPlayer {
 		ToggleMediaBtns();
 
 		this.stopBarRefresh();
+		this.setCardIsPlaying(ENUM.playbackState.stopped);
 	}
 
 	stopBarRefresh() {
 		this.isActiveBar = false;
 	}
 
-	beginBarRefresh() {
+	resumeBarRefresh() {
 		if (this.isActiveBar) return;
 		this.isActiveBar = true;
 
+		this.refreshBar();
+	}
+
+	refreshBar() {
+		if (!this.isActiveBar) return;
+
 		this.updateBar();
+		requestAnimationFrame(() => this.refreshBar());
 	}
 
 	updateBar() {
-		if (!this.isActiveBar) return;
-		
 		const currentTime = this.audio.currentTime;
-		const duration = this.audio.duration;
+		const duration = this.audio.duration || this.track.duration;
 
 		playerBar.style.width = (currentTime / duration * 100) + '%'
 		musicProgress.value = currentTime;
-
-		requestAnimationFrame(() => this.updateBar());
 	}
 }
 

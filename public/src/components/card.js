@@ -7,12 +7,23 @@ function Card(title, description, imageUrl, altText) {
 	card.className = 'card clickable';
 	card.innerHTML = `
 		<div class="card-image-wrapper" style="background-image: url(${imageUrl})">
-			<img src="/assets/pause.svg" class="play-icon hidden">
+			<img src="/assets/pause.svg" class="pause-icon hidden">
+			<img src="/assets/play.svg" class="play-icon hidden">
 			${altText ? '<span>' + altText + '</span>' : ''}
 		</div>
 		<h3 class="collapse-text">${title}</h3>
 		<p class="collapse-text">${description}</p>
 	`;
+
+	card.addEventListener('mouseenter', () => {
+		if ( card.classList.contains('active') ) return;
+		card.querySelector('.play-icon').classList.remove('hidden');
+	});
+
+	card.addEventListener('mouseleave', () => {
+		if ( card.classList.contains('active') ) return;
+		card.querySelector('.play-icon').classList.add('hidden');
+	});
 
 	return card;
 }
@@ -59,8 +70,8 @@ function CardArtist(artist) {
 	card.addEventListener('click', () => {
 		player.updatePlaylist(activeResult);
 
-		const album = artist.albums[0] || artist;
-		player.changeTrack(album.tracks[0]);
+		//const album = artist.albums[0] || artist;
+		player.changeTrack(artist.tracks[0]);
 	});
 
 	return card

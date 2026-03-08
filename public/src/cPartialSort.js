@@ -1,10 +1,16 @@
 class CPartialSort {
-	constructor(reference, filterInfo) {
-		this.reference = reference;
+	constructor(tabInfo, children, filterInfo) {
+		this.tabInfo = tabInfo;
+		this.reference = children;
 		this.filterInfo = filterInfo;
 		this.isReversed = false;
 
 		this.reset();
+	}
+
+	save() {
+		localStorage.setItem('sorting_filter', this.filterInfo.id);
+		localStorage.setItem('sorting_tab', this.tabInfo.id);
 	}
 
 	reset() {
@@ -46,6 +52,7 @@ class CPartialSort {
 		const maxLength = this.reference.length;
 		if (index >= maxLength) {
 			console.warn(`[CPartialSort] OUT OF BOUNDS! index(${index}) max(${maxLength})`);
+			console.trace();
 			return;
 		};
 
